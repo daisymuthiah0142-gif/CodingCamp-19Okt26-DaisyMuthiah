@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>To-Do-List Dashboard</title>
+  <!-- OpenDyslexic font via CDN -->
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" />
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/open-dyslexic" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="name-wrapper">
+        <span id="display-name" class="display-name"></span>
+        <button id="btn-edit-name" class="btn-icon" title="Edit name" aria-label="Edit name">✏️</button>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <!-- Language toggle -->
+      <button id="btn-lang" class="btn-icon lang-toggle" title="Switch language" aria-label="Switch language">
+        <span id="lang-label">EN</span>
+      </button>
+      <!-- Dark / Light toggle -->
+      <button id="btn-theme" class="btn-icon theme-toggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== GREETING SECTION ===== -->
+  <header class="greeting-section">
+    <p id="current-date" class="date"></p>
+    <h1 id="greeting" class="greeting-text"></h1>
+    <p id="current-time" class="time"></p>
+  </header>
+
+  <main class="dashboard-grid">
+
+    <!-- ===== FOCUS TIMER SECTION ===== -->
+    <section class="card timer-card">
+      <h2 class="card-title" data-i18n="timerTitle">Focus Timer</h2>
+      <div id="timer-display" class="timer-display">25:00</div>
+
+      <div class="timer-duration-row">
+        <label for="timer-duration-input" class="duration-label" data-i18n="timerDurationLabel">Duration (min)</label>
+        <input
+          type="number"
+          id="timer-duration-input"
+          class="duration-input"
+          value="25"
+          min="1"
+          max="120"
+        />
+        <button id="btn-set-duration" class="btn btn-ghost" data-i18n="timerSetBtn">Set</button>
+      </div>
+
+      <div class="timer-controls">
+        <button id="btn-start" class="btn btn-primary" data-i18n="timerStart">Start</button>
+        <button id="btn-stop" class="btn btn-secondary" data-i18n="timerStop">Stop</button>
+        <button id="btn-reset" class="btn btn-ghost" data-i18n="timerReset">Reset</button>
+      </div>
+      <p id="timer-status" class="timer-status" data-i18n="timerReady">Let's Get Started!</p>
+    </section>
+
+    <!-- ===== TO-DO LIST SECTION ===== -->
+    <section class="card todo-card">
+      <h2 class="card-title" data-i18n="todoTitle">To-Do List</h2>
+      <div class="todo-input-row">
+        <input
+          type="text"
+          id="todo-input"
+          class="todo-input"
+          data-i18n-placeholder="todoPlaceholder"
+          placeholder="Add a new task..."
+          maxlength="120"
+        />
+        <button id="btn-add-todo" class="btn btn-primary" data-i18n="todoAdd">Add</button>
+      </div>
+      <ul id="todo-list" class="todo-list"></ul>
+      <p id="todo-empty" class="empty-state" data-i18n="todoEmpty">No tasks yet. Add one above!</p>
+    </section>
+
+    <!-- ===== QUICK LINKS SECTION ===== -->
+    <section class="card links-card">
+      <h2 class="card-title" data-i18n="linksTitle">Quick Links</h2>
+      <div class="links-input-row">
+        <input
+          type="text"
+          id="link-name-input"
+          class="link-input"
+          data-i18n-placeholder="linksNamePlaceholder"
+          placeholder="Name (e.g. Home Workout)"
+          maxlength="30"
+        />
+        <input
+          type="url"
+          id="link-url-input"
+          class="link-input"
+          data-i18n-placeholder="linksUrlPlaceholder"
+          placeholder="URL (e.g. https://youtube.com)"
+        />
+        <button id="btn-add-link" class="btn btn-primary" data-i18n="linksAdd">Add</button>
+      </div>
+      <div id="links-container" class="links-container"></div>
+      <p id="links-empty" class="empty-state" data-i18n="linksEmpty">No links yet. Add your favorites!</p>
+    </section>
+
+  </main>
+
+  <!-- ===== EDIT TASK MODAL ===== -->
+  <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-box">
+      <h3 id="modal-title" class="modal-title" data-i18n="editTaskTitle">Edit Task</h3>
+      <input type="text" id="edit-input" class="todo-input" maxlength="120" />
+      <div class="modal-actions">
+        <button id="btn-modal-save" class="btn btn-primary" data-i18n="save">Save</button>
+        <button id="btn-modal-cancel" class="btn btn-ghost" data-i18n="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TIMER DONE POPUP ===== -->
+  <div id="timer-done-popup" class="timer-popup hidden" role="alertdialog" aria-modal="true" aria-labelledby="popup-title">
+    <div class="timer-popup-box">
+      <div class="timer-popup-icon">⏰</div>
+      <h2 id="popup-title" class="timer-popup-title" data-i18n="popupTitle">Time's Up!</h2>
+      <p class="timer-popup-msg" data-i18n="popupMsg">Time's Up! You doing Awesome! >.< — Let's Take a break!</p>
+      <div class="timer-popup-actions">
+        <button id="btn-popup-close" class="btn btn-primary" data-i18n="popupClose">Got it!</button>
+        <button id="btn-popup-restart" class="btn btn-ghost" data-i18n="popupRestart">Start Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EDIT NAME MODAL ===== -->
+  <div id="name-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="name-modal-title">
+    <div class="modal-box">
+      <h3 id="name-modal-title" class="modal-title" data-i18n="nameModalTitle">What's your name?</h3>
+      <input
+        type="text"
+        id="name-input"
+        class="todo-input"
+        data-i18n-placeholder="nameModalPlaceholder"
+        placeholder="Enter your name…"
+        maxlength="40"
+      />
+      <div class="modal-actions">
+        <button id="btn-name-save" class="btn btn-primary" data-i18n="save">Save</button>
+        <button id="btn-name-cancel" class="btn btn-ghost" data-i18n="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
