@@ -66,7 +66,7 @@ const TRANSLATIONS = {
     linksAriaRemove:      (name) => `Remove ${name}`,
     // Timer popup
     popupTitle:           "Time's Up!",
-    popupMsg:             'Your focus session is complete. Great work — take a well-deserved break!',
+    popupMsg:             "Time's Up! You doing Awesome! >.<  — Let's Take a Break!",
     popupClose:           'Got it!',
     popupRestart:         'Start Again',
     // Notification
@@ -120,7 +120,7 @@ const TRANSLATIONS = {
     linksAriaRemove:      (name) => `Hapus ${name}`,
     // Timer popup
     popupTitle:           'Waktu Habis!',
-    popupMsg:             'Sesi fokusmu selesai. Kerja bagus — saatnya istirahat sejenak!',
+    popupMsg:             "Waktu Habis! Kamu Hebat! >.<  — Yuk Istirahat Sebentar!",
     popupClose:           'Oke!',
     popupRestart:         'Mulai Lagi',
     // Notification
