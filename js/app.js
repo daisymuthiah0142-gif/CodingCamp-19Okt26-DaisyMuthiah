@@ -332,6 +332,7 @@ if (!getUserName()) {
 // ─── 3. FOCUS TIMER ──────────────────────────
 
 const STORAGE_KEY_TIMER_DURATION = 'dashboard_timer_duration';
+const STORAGE_KEY_TIMER_STATE    = 'dashboard_timer_state';
 const DEFAULT_DURATION_MIN = 25;
 
 const elTimerDisplay  = document.getElementById('timer-display');
@@ -355,11 +356,63 @@ function saveTimerDuration(minutes) {
   localStorage.setItem(STORAGE_KEY_TIMER_DURATION, String(minutes));
 }
 
+/**
+ * Persist the current running state so it survives a refresh.
+ * Saves: remaining seconds + the timestamp when it was saved.
+ */
+function saveTimerState() {
+  if (timerRunning) {
+    localStorage.setItem(STORAGE_KEY_TIMER_STATE, JSON.stringify({
+      remaining:  timerRemaining,
+      savedAt:    Date.now(),
+      running:    true,
+    }));
+  }
+}
+
+/** Clear persisted timer state (on stop / reset / finish). */
+function clearTimerState() {
+  localStorage.removeItem(STORAGE_KEY_TIMER_STATE);
+}
+
+/**
+ * On page load, restore timer state from LocalStorage.
+ * If the timer was running, calculate elapsed time since the
+ * last save and subtract it so the countdown stays accurate.
+ * Returns { remaining, wasRunning }.
+ */
+function restoreTimerState(totalSec) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_TIMER_STATE);
+    if (!raw) return { remaining: totalSec, wasRunning: false };
+
+    const state = JSON.parse(raw);
+    if (!state.running) return { remaining: totalSec, wasRunning: false };
+
+    // Calculate how many seconds passed while the page was closed
+    const elapsed   = Math.floor((Date.now() - state.savedAt) / 1000);
+    const remaining = state.remaining - elapsed;
+
+    // Timer already expired while page was closed
+    if (remaining <= 0) {
+      clearTimerState();
+      return { remaining: 0, wasRunning: false, expired: true };
+    }
+
+    return { remaining, wasRunning: true };
+  } catch {
+    return { remaining: totalSec, wasRunning: false };
+  }
+}
+
 let timerDurationMin = loadTimerDuration();
 let timerTotalSec    = timerDurationMin * 60;
-let timerRemaining   = timerTotalSec;
 let timerInterval    = null;
 let timerRunning     = false;
+
+// ── Restore state from before refresh
+const restored = restoreTimerState(timerTotalSec);
+let timerRemaining = restored.remaining;
 
 elDurationInput.value = timerDurationMin;
 
@@ -458,6 +511,7 @@ function timerTick() {
     timerInterval  = null;
     timerRunning   = false;
     timerRemaining = 0;
+    clearTimerState();
     renderTimer();
     elTimerDisplay.className  = 'timer-display finished';
     elTimerStatus.textContent = t('timerDone');
@@ -468,6 +522,7 @@ function timerTick() {
   }
   timerRemaining--;
   renderTimer();
+  saveTimerState(); // persist every tick
 }
 
 function startTimer() {
@@ -476,6 +531,7 @@ function startTimer() {
   timerInterval = setInterval(timerTick, 1000);
   elTimerDisplay.className  = 'timer-display running';
   elTimerStatus.textContent = t('timerRunning');
+  saveTimerState();
 }
 
 function stopTimer() {
@@ -483,6 +539,7 @@ function stopTimer() {
   clearInterval(timerInterval);
   timerInterval = null;
   timerRunning  = false;
+  clearTimerState(); // paused = don't resume on refresh
   elTimerDisplay.className  = 'timer-display';
   elTimerStatus.textContent = t('timerPaused');
 }
@@ -492,6 +549,7 @@ function resetTimer() {
   timerInterval  = null;
   timerRunning   = false;
   timerRemaining = timerTotalSec;
+  clearTimerState();
   renderTimer();
   elTimerDisplay.className  = 'timer-display';
   elTimerStatus.textContent = t('timerReady');
@@ -516,7 +574,24 @@ btnStart.addEventListener('click', startTimer);
 btnStop.addEventListener('click',  stopTimer);
 btnReset.addEventListener('click', resetTimer);
 
+// ── Resume or handle expired timer on page load
 renderTimer();
+
+if (restored.expired) {
+  // Timer finished while page was closed — show popup + alarm
+  timerRemaining = 0;
+  elTimerDisplay.className  = 'timer-display finished';
+  elTimerStatus.textContent = t('timerDone');
+  renderTimer();
+  openTimerPopup();
+  playAlarm();
+} else if (restored.wasRunning) {
+  // Timer was running — resume automatically
+  elTimerDisplay.className  = 'timer-display running';
+  elTimerStatus.textContent = t('timerRunning');
+  timerRunning  = true;
+  timerInterval = setInterval(timerTick, 1000);
+}
 
 // ─── 4. TO-DO LIST ───────────────────────────
 
